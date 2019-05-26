@@ -2,7 +2,7 @@ import re
 from pyvi import ViTokenizer
 import csv
 
-fh=open("dataset.csv","r")
+fh=open("Training.csv","r")
 
 # The delimiter in the csv file is '+' instead of comma. This was done to compromise with the commas in the sentence in the sentence of the dataset used.
 reader = csv.reader(fh, delimiter='+')
@@ -27,11 +27,11 @@ for row in reader:
 	# Initialize the dictionary for a label if not present
 	dataset.setdefault(row[1],{})
 	# Split the sentence with respect to non-characters, and donot split if apostophe is present
-	split_data = re.split(' ', ViTokenizer.tokenize(row[0].decode('utf-8')))
+	split_data = re.split('[\s,.;:?!-]', ViTokenizer.tokenize(row[0].decode('utf-8')))
 	# For every word in split data
 	for i in split_data:
 		# Removing stop words to a small extent by ignoring words with length less than 3
-		if len(i) > 2:
+		if i != "":
 			# Initialize the word count in dataset
 			dataset[row[1]].setdefault(i.lower(),0)
 			# Increase the word count on its occurence with label row[1]

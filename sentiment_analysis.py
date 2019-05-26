@@ -33,17 +33,18 @@ def weighted_prob(word, category):
 # To get probability of the test data for the given category
 def test_prob(test, category):
     # Split the test data
-    split_data = re.split(' ', ViTokenizer.tokenize(test.decode('utf-8')))
+    split_data = re.split('[\s,.;:?!-]', ViTokenizer.tokenize(test.decode('utf-8')))
 
     data = []
     for i in split_data:
-        if ' ' in i:
-            i = i.split(' ')
-            for j in i:
-                if j not in data:
-                    data.append(j.lower())
-        elif len(i) > 2 and i not in data:
-            data.append(i.lower())
+        if i != "":
+            if ' ' in i:
+                i = i.split(' ')
+                for j in i:
+                    if j not in data:
+                        data.append(j.lower())
+            elif i not in data:
+                data.append(i.lower())
 
     p = 1
     for i in data:
