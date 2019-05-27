@@ -1,44 +1,47 @@
+# encoding=utf8
+import sys
 import re
 from pyvi import ViTokenizer
 import csv
 
-fh=open("Training.csv","r")
+reload(sys)
+sys.setdefaultencoding('utf8')
 
-# The delimiter in the csv file is '+' instead of comma. This was done to compromise with the commas in the sentence in the sentence of the dataset used.
+fh=open("Training_demo.csv","r")
+
+# Comment và nhãn cách nhau bởi dấu +
 reader = csv.reader(fh, delimiter='+')
 
-# It is the dictionary that has the data : { label(positive/negative) : { word : count of number of occurences of the word } }
+# Chứa số lần xuất hiện của từ tương ứng với các nhãn. Vd: {nhãn 1 : {từ : số lần xuất hiện trong nhãn 1}}
 dataset={}
 
-# It is the dictionary that keeps the count of records that are labeled a label l for each label l
-# That is, { label l : No. of records that are labeled l }
+# Chứa số lượng câu của từng nhãn
 no_of_items={}
 
-# This is the dictionary that contains the count of the occurences of word under each label
-# That is, { word : { label l : count of the occurence of word with label l } }
+# Chứa số lần xuất hiện của từ ứng với từng nhãn. Vd: {từ : {nhã 1 : số lần xuất hiện trong nhãn 1}}
 feature_set={}
 
-# For each sentence in dataset
+# Xử lý từng comment
 for row in reader:
-	# Initialize the label in the dictionary if not present already
+	# Khởi tạo giá trị mặc định cho biến no_of_items
 	no_of_items.setdefault(row[1],0)
-	# Increase the count of occurence of label by 1 for every occurence
+	# Tăng số lượng câu ứng với từng nhãn lên 1
 	no_of_items[row[1]]+=1
-	# Initialize the dictionary for a label if not present
+	# Khởi tạo giá trị mặc định cho biến dataset
 	dataset.setdefault(row[1],{})
-	# Split the sentence with respect to non-characters, and donot split if apostophe is present
+	# Tách từ và lưu vào file split_data
 	split_data = re.split('[\s,.;:?!-]', ViTokenizer.tokenize(row[0].decode('utf-8')))
-	# For every word in split data
+	# Xử lý từng từ trong file split_data
 	for i in split_data:
-		# Removing stop words to a small extent by ignoring words with length less than 3
+		# Loại bỏ ký tự '' xuất hiện khi tách từ
 		if i != "":
-			# Initialize the word count in dataset
+			# Khởi tạo bộ đếm từ cho dataset (nếu chưa được khởi tạo)
 			dataset[row[1]].setdefault(i.lower(),0)
-			# Increase the word count on its occurence with label row[1]
+			# Tăng số lần xuất hiện với nhãn tương ứng trong biến dataset
 			dataset[row[1]][i.lower()]+=1
-			# Initialze a dictionary for a newly found word in feature set
+			# Khởi tạo bộ đếm cho từ mới trong feature set (nếu chưa được khởi tạo)
 			feature_set.setdefault(i.lower(),{})
-			# If the label was found for the word, for the first time, initialize corresponding count value for word as key
+			# Khởi tạo biến đếm cho nhãn (nếu chưa được khởi tạo)
 			feature_set[i.lower()].setdefault(row[1],0)
-			# Increment the count for the word in that label
+			# Tăng biến đếm cho nhãn tương ứng
 			feature_set[i.lower()][row[1]]+=1

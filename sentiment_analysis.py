@@ -1,50 +1,34 @@
+# encoding=utf8
+import sys
 import re
 from pyvi import ViTokenizer
 from sensitive_data import dataset, feature_set, no_of_items
 
-
-# To calculate the basic probability of a word for a category
-def calc_prob(word, category):
-    if word not in feature_set or word not in dataset[category]:
-        return 0
-
-    return float(dataset[category][word]) / no_of_items[category]
-
+reload(sys)
+sys.setdefaultencoding('utf8')
 
 # Weighted probability of a word for a category
 def weighted_prob(word, category):
-    # basic probability of a word - calculated by calc_prob
-    basic_prob = calc_prob(word, category)
 
-    # total_no_of_appearances - in all the categories
-    if word in feature_set:
-        tot = sum(feature_set[word].values())
+    v = len(feature_set)
+    count_c = sum(dataset[category].values())
+    if word in dataset[category]:
+        count_w_c = feature_set[word][category]
     else:
-        tot = 0
+        count_w_c = 0
 
-    # Weighted probability is given by the formula
-    # (weight*assumedprobability + total_no_of_appearances*basic_probability)/(total_no_of_appearances+weight)
-    # weight by default is taken as 1.0
-    # assumed probability is 0.5 here
-    weight_prob = ((1.0 * 0.5) + (tot * basic_prob)) / (1.0 + tot)
+    weight_prob = (1.0 + count_w_c) / (count_c + v)
     return weight_prob
 
 
 # To get probability of the test data for the given category
 def test_prob(test, category):
-    # Split the test data
+    # Tách từ trong câu test
     split_data = re.split('[\s,.;:?!-]', ViTokenizer.tokenize(test.decode('utf-8')))
 
     data = []
     for i in split_data:
-        if i != "":
-            if ' ' in i:
-                i = i.split(' ')
-                for j in i:
-                    if j not in data:
-                        data.append(j.lower())
-            elif i not in data:
-                data.append(i.lower())
+        data.append(i.lower())
 
     p = 1
     for i in data:
@@ -52,35 +36,35 @@ def test_prob(test, category):
     return p
 
 
-# Naive Bayes implementation
+# Naive Bayes
 def naive_bayes(test):
     '''
         p(A|B) = p(B|A) * p(A) / p(B)
-        Assume A - Category
-               B - Test data
-               p(A|B) - Category given the Test data
-        Here ignoring p(B) in the denominator (Since it remains same for every category)
+        Ghi chú A - Nhãn
+                B - Dữ liệu test
+                p(A|B) - Category given the Test data
+        Chúng ta loại bỏ p(B) vì giá trị này bằng nhanh với mọi nhãn
     '''
     results = {}
     for i in dataset.keys():
-        # Category Probability
-        # Number of items in category/total number of items
-        cat_prob = float(no_of_items[i]) / sum(no_of_items.values())
+        # Tính toán xác suất cửa từng nhãn - p(A)
+        # Số lượng câu trong từng nhãn/tổng số lượng câu
+        c_prob = float(no_of_items[i]) / sum(no_of_items.values())
 
-        # p(test data | category)
+        # p(B|A)
         test_prob1 = test_prob(test, i)
 
-        results[i] = test_prob1 * cat_prob
+        results[i] = test_prob1 * c_prob
 
     return results
 
-print 'Enter the sentence'
+print 'Vui lòng nhập câu:'
 text = raw_input()
 result = naive_bayes(text)
 
 if (result['1'] >= result['-1']) and (result['1'] >= result['0']):
-    print 'positive'
+    print 'Tích cực'
 elif (result['0'] >= result['-1']) and (result['0'] >= result['-1']):
-    print 'neutral'
+    print 'Trung tính'
 else:
-    print 'negative'
+    print 'Tiêu cực'
