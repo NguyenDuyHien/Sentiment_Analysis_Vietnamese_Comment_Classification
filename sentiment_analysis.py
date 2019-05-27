@@ -7,21 +7,24 @@ from sensitive_data import dataset, feature_set, no_of_items
 reload(sys)
 sys.setdefaultencoding('utf8')
 
-# Weighted probability of a word for a category
-def weighted_prob(word, category):
+# p(B|A)
+def prob_b_a(word, category):
 
+    # Tổng số từ khác nhau trong toàn bộ các nhãn
     v = len(feature_set)
+
+    # Tổng số từ của nhãn x
     count_c = sum(dataset[category].values())
+
+    # Số lần từ xuất hiện trong nhãn x
     if word in dataset[category]:
         count_w_c = feature_set[word][category]
     else:
         count_w_c = 0
 
-    weight_prob = (1.0 + count_w_c) / (count_c + v)
-    return weight_prob
+    prob_b_a = (1.0 + count_w_c) / (count_c + v)
+    return prob_b_a
 
-
-# To get probability of the test data for the given category
 def test_prob(test, category):
     # Tách từ trong câu test
     split_data = re.split('[\s,.;:?!-]', ViTokenizer.tokenize(test.decode('utf-8')))
@@ -32,9 +35,8 @@ def test_prob(test, category):
 
     p = 1
     for i in data:
-        p *= weighted_prob(i, category)
+        p *= prob_b_a(i, category)
     return p
-
 
 # Naive Bayes
 def naive_bayes(test):
@@ -49,12 +51,12 @@ def naive_bayes(test):
     for i in dataset.keys():
         # Tính toán xác suất cửa từng nhãn - p(A)
         # Số lượng câu trong từng nhãn/tổng số lượng câu
-        c_prob = float(no_of_items[i]) / sum(no_of_items.values())
+        prob_a = float(no_of_items[i]) / sum(no_of_items.values())
 
         # p(B|A)
         test_prob1 = test_prob(test, i)
 
-        results[i] = test_prob1 * c_prob
+        results[i] = test_prob1 * prob_a
 
     return results
 
