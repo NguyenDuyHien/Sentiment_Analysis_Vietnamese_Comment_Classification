@@ -45,7 +45,7 @@ def naive_bayes(test):
         Ghi chú A - Nhãn
                 B - Dữ liệu test
                 p(A|B) - Category given the Test data
-        Chúng ta loại bỏ p(B) vì giá trị này bằng nhanh với mọi nhãn
+        Chúng ta loại bỏ p(B) vì giá trị này bằng nhau với mọi nhãn
     '''
     results = {}
     for i in dataset.keys():
