@@ -7,10 +7,10 @@ import csv
 reload(sys)
 sys.setdefaultencoding('utf8')
 
-fh=open("Training_demo.csv","r")
+f=open("Training.csv","r")
 
 # Comment và nhãn cách nhau bởi dấu +
-reader = csv.reader(fh, delimiter='+')
+reader = csv.reader(f, delimiter='+')
 
 # Chứa số lần xuất hiện của từ tương ứng với các nhãn. Vd: {nhãn 1 : {từ : số lần xuất hiện trong nhãn 1}}
 dataset={}
@@ -45,3 +45,4 @@ for row in reader:
 			feature_set[i.lower()].setdefault(row[1],0)
 			# Tăng biến đếm cho nhãn tương ứng
 			feature_set[i.lower()][row[1]]+=1
+f.close()

@@ -1,6 +1,7 @@
 # encoding=utf8
 import sys
 import re
+import unicodecsv as csv
 from pyvi import ViTokenizer
 from sensitive_data import dataset, feature_set, no_of_items
 
@@ -31,7 +32,8 @@ def test_prob(test, category):
 
     data = []
     for i in split_data:
-        data.append(i.lower())
+        if i != "":
+            data.append(i.lower())
 
     p = 1
     for i in data:
@@ -60,13 +62,24 @@ def naive_bayes(test):
 
     return results
 
-print 'Vui lòng nhập câu:'
-text = raw_input()
-result = naive_bayes(text)
+print 'Đang test...'
 
-if (result['1'] >= result['-1']) and (result['1'] >= result['0']):
-    print 'Tích cực'
-elif (result['0'] >= result['-1']) and (result['0'] >= result['-1']):
-    print 'Trung tính'
-else:
-    print 'Tiêu cực'
+fin=open("Test.csv","r")
+fout=open("Test_Result.csv","wb")
+reader = csv.reader(fin, delimiter="\n")
+writer = csv.writer(fout, delimiter="\n")
+for row in reader:
+    result = naive_bayes(row[0])
+    if (result['1'] >= result['-1']) and (result['1'] >= result['0']):
+        result_line = row[0] + '+1'
+    elif (result['0'] >= result['-1']) and (result['0'] >= result['-1']):
+        result_line = row[0] + '+0'
+    else:
+        result_line = row[0] + '+-1'
+    writer.writerow([result_line])
+fin.close()
+fout.close()
+
+print 'Hoàn thành!'
+
+
